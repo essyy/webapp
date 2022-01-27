@@ -1,0 +1,162 @@
+<?php
+
+$host = "localhost";
+$user = "root";
+$password ="";
+$database = "food_db";
+
+$food_id ="";
+$food_name="";
+$price="";
+$description="";
+$image ="";
+$file_path="";
+//connection
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+try{
+    $connect = mysqli_connect($host, $user, $password, $database);
+} catch (mysqli_sql_exception $ex) {
+    echo 'Error';
+}
+//get values
+function getPosts()
+{
+    $posts = array();
+    $posts[0] = $_POST['food_id'];
+    $posts[1] = $_POST['food_name'];
+    $posts[2] = $_POST['price'];
+    $posts[3] = $_POST['description'];
+    $posts[4] = $_POST['image'];
+    $posts[5] = $_POST['file_path'];
+    return $posts;
+}
+//search
+if(isset($_POST['search']))
+{
+    $data = getPosts();
+    
+    $search_Query = "SELECT * FROM fooditems WHERE food_id = $data[0]";
+    
+    $search_Result = mysqli_query($connect, $search_Query);
+    
+    if($search_Result)
+    {
+        if(mysqli_num_rows($search_Result))
+        {
+            while($row = mysqli_fetch_array($search_Result))
+            {
+                $food_id =$row['food_id'];
+    $food_name =$row['food_name'];
+    $price = $row['price'];
+    $description=$row['description'];
+    $image= $row['image'];
+    $file_path= $row['file_path'];
+    
+            }
+        }else{
+            echo 'No Data For This Id';
+        }
+    }else{
+        echo 'Result Error';
+    }
+}
+//insert
+if(isset($_POST['insert']))
+{
+    $data = getPosts();
+    $insert_Query = "INSERT INTO `fooditems`(`food_name`, `price`,`description`,`image`, `file_path`) VALUES ('$data[1]','$data[2]','$data[3]','$data[4]',$data[5])";
+    try{
+        $insert_Result = mysqli_query($connect, $insert_Query);
+        
+        if($insert_Result)
+        {
+            if(mysqli_affected_rows($connect) > 0)
+            {
+                echo 'Data Inserted';
+            }else{
+                echo 'Data Not Inserted';
+            }
+        }
+    } catch (Exception $ex) {
+        echo 'Error Insert '.$ex->getMessage();
+    }
+}
+//delete
+
+if(isset($_POST['delete']))
+{
+    $data = getPosts();
+    $delete_Query = "DELETE FROM `fooditems` WHERE `food_id` = $data[0]";
+    try{
+        $delete_Result = mysqli_query($connect, $delete_Query);
+        
+        if($delete_Result)
+        {
+            if(mysqli_affected_rows($connect) > 0)
+            {
+                echo 'Data Deleted';
+            }else{
+                echo 'Data Not Deleted';
+            }
+        }
+    } catch (Exception $ex) {
+        echo 'Error Delete '.$ex->getMessage();
+    }
+}
+//update
+
+if(isset($_POST['update']))
+{
+    $data = getPosts();
+    $update_Query = "UPDATE `food_id` SET `food_name`='$data[1]',`price`='$data[2]',`description`='$data[3]',`image`='$data[4]',`file_path`=$data[5] WHERE `id` = $data[0]";
+    try{
+        $update_Result = mysqli_query($connect, $update_Query);
+        
+        if($update_Result)
+        {
+            if(mysqli_affected_rows($connect) > 0)
+            {
+                echo 'Data Updated';
+            }else{
+                echo 'Data Not Updated';
+            }
+        }
+    } catch (Exception $ex) {
+        echo 'Error Update '.$ex->getMessage();
+    }
+}
+
+
+
+?>
+
+
+<!DOCTYPE Html>
+<html>
+    <head>
+        <title>PHP INSERT UPDATE DELETE SEARCH</title>
+    </head>
+    <body>
+        <form action="insert.php" method="post">
+           <input type="number" name="food_id"placeholder="food_id"  value="<?php echo $food_id;?>"><br>
+    <input type="text" name="food_name" placeholder="Food name" value="<?php echo $food_name;?>"><br>
+        <input type="number" name="price" placeholder="price" value="<?php echo $price;?>"><br>
+    <input type="text" name="description" placeholder="description" value="<?php echo $description;?>"><br>
+    <input type="text" name="image" placeholder="image" value="<?php echo $image;?>"><br>
+    <input type="text" name="file_path" placeholder="file_path" value="<?php echo $file_path;?>"><br>
+            <div>
+                <!-- Input For Add Values To Database-->
+                <input type="submit" name="insert" value="Add">
+                
+                <!-- Input For Edit Values -->
+                <input type="submit" name="update" value="Update">
+                
+                <!-- Input For Clear Values -->
+                <input type="submit" name="delete" value="Delete">
+                
+                <!-- Input For Find Values With The given ID -->
+                <input type="submit" name="search" value="Find">
+            </div>
+        </form>
+    </body>
+</html>
